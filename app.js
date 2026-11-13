@@ -33,9 +33,22 @@ for(const site of dataset.sites){
  group.on('mouseenter',show).on('focus',show).on('click',show).on('mouseleave',()=>{tip.textContent='송신소에 마우스를 올리거나 선택하면 위경도가 표시됩니다.';});
 }
 const hp=projection(HOME);svg.append('circle').attr('cx',hp[0]).attr('cy',hp[1]).attr('r',8).attr('class','home');label(HOME,'성남시 분당구',12,25,'home-label');
-const rows=[];dataset.sites.forEach(s=>s.channels.forEach(c=>rows.push({site:s,name:c[0],frequency:c[1]})));
-rows.sort((a,b)=>parseFloat(a.frequency)-parseFloat(b.frequency));
 const body=document.getElementById('station-rows');
-for(const r of rows){const tr=document.createElement('tr');[r.name,r.frequency,r.site.name,r.site.region,`${r.site.coord[1].toFixed(5)}, ${r.site.coord[0].toFixed(5)}`,`${format(r.site.coord)} km`].forEach(value=>{const td=document.createElement('td');td.textContent=value;tr.appendChild(td)});body.appendChild(tr)}
-document.getElementById('count').textContent=`${rows.length}개 방송 · ${dataset.sites.length}개 송신소`;
+for(const site of dataset.sites){
+ const tr=document.createElement('tr');
+ const heading=document.createElement('th');heading.scope='row';heading.textContent=site.name;tr.appendChild(heading);
+ const channels=document.createElement('td'),list=document.createElement('ul');list.className='channel-list';
+ for(const [name,frequency] of site.channels){
+  const item=document.createElement('li'),freq=document.createElement('span');
+  freq.className='channel-frequency';freq.textContent=frequency;
+  item.append(document.createTextNode(name+' · '),freq);list.appendChild(item);
+ }
+ channels.appendChild(list);tr.appendChild(channels);
+ for(const value of [site.region,`${site.coord[1].toFixed(5)}, ${site.coord[0].toFixed(5)}`,`${format(site.coord)} km`]){
+  const td=document.createElement('td');td.textContent=value;tr.appendChild(td);
+ }
+ body.appendChild(tr);
+}
+const channelCount=dataset.sites.reduce((total,site)=>total+site.channels.length,0);
+document.getElementById('count').textContent=`${channelCount}개 방송 · ${dataset.sites.length}개 송신소`;
 document.getElementById('sources').innerHTML=dataset.sources.map(([name,url])=>`<li><a href="${url}" target="_blank" rel="noopener noreferrer">${name}</a></li>`).join('');
