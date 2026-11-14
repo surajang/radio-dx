@@ -1,0 +1,14 @@
+{
+  "name": "radio-dx-local-app",
+  "version": "1.0.0",
+  "description": "국내 AM/FM 및 일본 NHK·라디오 닛케이 편성표 정기 수집 및 홈 네트워크 로컬 웹 서버",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "update": "node updater.js",
+    "test": "node test.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

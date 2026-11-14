@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="국내 AM·FM 20개 방송 및 일본 NHK 중파·라디오 닛케이 단파 방송의 일일 편성표와 실시간 ON AIR 대시보드 (홈 네트워크 로컬 서버)">
+  <title>실시간 편성표 · ON AIR 대시보드 | Radio DX Local</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="brand-wrap">
+      <a class="brand" href="/">RADIO DX <span class="brand-sub">LOCAL SERVER</span></a>
+    </div>
+    <nav aria-label="전체 메뉴">
+      <a href="#onair-section" data-view="dashboard" aria-current="page">실시간 ON AIR</a>
+      <a href="#timetable-section" data-view="timetable">일일 전체 편성표</a>
+      <a href="/dx-map/index.html" target="_blank" rel="noopener">국내 송신소 지도 ↗</a>
+      <a href="/dx-map/overseas.html" target="_blank" rel="noopener">해외 송신소 지도 ↗</a>
+      <a href="/dx-map/tuner.html" target="_blank" rel="noopener">주파수 탐색 ↗</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="hero-bar">
+      <div>
+        <h1>라디오 편성표 · 실시간 ON AIR</h1>
+        <p class="intro">수도권 주요 AM·FM 방송(20개 채널·22개 주파수)과 일본 NHK 제1·라디오 닛케이(4개 채널·5개 주파수)의 편성표를 24시간 주기로 자동 수집합니다.</p>
+      </div>
+      <div class="clock-card" aria-live="polite">
+        <div class="clock-label">한국표준시 (KST · UTC+9)</div>
+        <div id="live-clock" class="clock-time">--:--:--</div>
+        <div id="live-date" class="clock-date">----년 --월 --일</div>
+      </div>
+    </div>
+
+    <section class="status-strip" aria-label="수집 및 서버 상태">
+      <div class="status-items">
+        <span class="status-pill"><span class="dot ok"></span><strong id="status-channels">24/24 채널</strong> 수집 정상</span>
+        <span>기준일: <strong id="status-date">-</strong></span>
+        <span>최근 업데이트: <strong id="status-updated">-</strong></span>
+        <span>다음 자동 갱신(24h): <strong id="status-next">-</strong></span>
+      </div>
+      <button type="button" id="refresh-btn" class="btn-refresh">지금 편성표 업데이트</button>
+    </section>
+
+    <div class="legend">
+      <span><i class="key"></i>FM 초단파 (관악산·남산)</span>
+      <span><i class="key am"></i>AM 중파 (소래·남양·오사카·후쿠오카)</span>
+      <span><i class="key sw"></i>SW 단파 (나가라·네무로)</span>
+    </div>
+
+    <!-- 섹션 1: 현재 시간(KST) 기준 지금 방송 중(ON AIR) 프로그램 및 주파수 요약 대시보드 -->
+    <section id="onair-section" aria-labelledby="onair-heading">
+      <div class="section-header">
+        <h2 id="onair-heading">지금 방송 중 (ON AIR) 요약 대시보드</h2>
+        <span id="onair-count" class="count-badge"></span>
+      </div>
+
+      <div class="filter-bar" role="region" aria-label="방송 필터 및 검색">
+        <div class="filter-tabs" id="scope-filters" role="group" aria-label="대역 및 지역 필터">
+          <button type="button" class="filter-chip active" data-filter="all">전체 (24)</button>
+          <button type="button" class="filter-chip" data-filter="domestic-fm">국내 FM (20)</button>
+          <button type="button" class="filter-chip" data-filter="domestic-am">국내 AM (2)</button>
+          <button type="button" class="filter-chip" data-filter="overseas-am">일본 NHK 중파 (2)</button>
+          <button type="button" class="filter-chip" data-filter="overseas-sw">라디오 닛케이 단파 (2)</button>
+        </div>
+        <div class="filter-inputs">
+          <select id="site-filter" aria-label="송신소 선택">
+            <option value="all">모든 송신소 (8곳)</option>
+          </select>
+          <input id="search-input" type="search" placeholder="주파수(예: 97.3, 666), 방송국, 프로그램 검색..." aria-label="주파수, 방송국, 프로그램 검색">
+        </div>
+      </div>
+
+      <div id="onair-grid" class="onair-grid"></div>
+    </section>
+
+    <!-- 섹션 2: 방송국/주파수별 일일 전체 편성표 타임라인·테이블 뷰 -->
+    <section id="timetable-section" aria-labelledby="timetable-heading">
+      <div class="section-header">
+        <h2 id="timetable-heading">방송국 · 주파수별 일일 전체 편성표</h2>
+        <div class="timetable-actions">
+          <button type="button" id="scroll-onair-btn" class="btn-secondary">현재 방송 위치로 이동</button>
+        </div>
+      </div>
+
+      <div class="timetable-layout">
+        <aside class="station-sidebar" aria-label="방송국 선택 목록">
+          <div class="sidebar-header">방송국 · 주파수 선택</div>
+          <div id="station-selector" class="station-selector-list"></div>
+        </aside>
+
+        <div class="timetable-content">
+          <div id="selected-station-header" class="selected-station-card"></div>
+
+          <!-- 24시간 시각적 타임라인 바 -->
+          <div class="timeline-box" aria-label="24시간 편성 타임라인">
+            <div class="timeline-header">
+              <span>00:00 ~ 24:00 일일 타임라인 (KST)</span>
+              <span id="timeline-cursor-label" class="timeline-now-label">현재 시각</span>
+            </div>
+            <div class="timeline-track-wrap">
+              <div id="timeline-track" class="timeline-track"></div>
+              <div id="timeline-now-line" class="timeline-now-line" title="현재 시각"></div>
+            </div>
+            <div class="timeline-hours">
+              <span>00시</span><span>03시</span><span>06시</span><span>09시</span><span>12시</span><span>15시</span><span>18시</span><span>21시</span><span>24시</span>
+            </div>
+          </div>
+
+          <!-- 일일 편성표 테이블 -->
+          <div class="table-wrap schedule-table-wrap">
+            <table class="schedule-table">
+              <caption id="schedule-table-caption" class="sr-only">선택한 방송국의 일일 편성표</caption>
+              <thead>
+                <tr>
+                  <th scope="col">방송 시간 (KST)</th>
+                  <th scope="col">상태</th>
+                  <th scope="col">프로그램명</th>
+                  <th scope="col">진행 · 부제 · 안내</th>
+                  <th scope="col">분량</th>
+                </tr>
+              </thead>
+              <tbody id="schedule-rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Radio DX 홈 네트워크 로컬 애플리케이션 · 기준점: 성남시 분당구청 부근 (37.3827°N, 127.1188°E) · 24시간 주기 자동 업데이트
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
