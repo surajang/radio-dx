@@ -15,7 +15,7 @@ const UPDATE_INTERVAL_HOURS = Number(process.env.UPDATE_INTERVAL_HOURS || 24);
 const UPDATE_INTERVAL_MS = UPDATE_INTERVAL_HOURS * 60 * 60 * 1000;
 
 const PUBLIC_DIR = path.resolve(__dirname, 'public');
-const ROOT_REPO_DIR = path.resolve(__dirname, '..');
+const STATIC_PAGE_DIR = path.resolve(__dirname, '../page');
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -211,7 +211,7 @@ const server = http.createServer(async (req, res) => {
   // 기존 정적 지도/탐색기 페이지 연동 (/dx-map/*)
   if (pathname.startsWith('/dx-map/')) {
     const subPath = pathname.slice('/dx-map/'.length) || 'index.html';
-    return serveStaticFile(res, ROOT_REPO_DIR, subPath);
+    return serveStaticFile(res, STATIC_PAGE_DIR, subPath);
   }
 
   // 로컬 웹 앱 정적 파일 서빙

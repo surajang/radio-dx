@@ -20,7 +20,7 @@ function calcDistanceKm([lon1, lat1], [lon2, lat2]) {
 }
 
 function loadRootStationsJs() {
-  const stationsPath = path.resolve(__dirname, '../../stations.js');
+  const stationsPath = path.resolve(__dirname, '../../page/stations.js');
   const code = fs.readFileSync(stationsPath, 'utf8');
   const sandbox = {};
   vm.runInNewContext(`${code}\nthis.RADIO_DATA = RADIO_DATA;`, sandbox);
