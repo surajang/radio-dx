@@ -4,14 +4,14 @@ const dataset=RADIO_DATA[page];
 const km=c=>d3.geoDistance(HOME,c)*6371.0088;
 const format=c=>page==='domestic'?km(c).toFixed(1):Math.round(km(c)).toLocaleString();
 const svg=d3.select('#map').attr('viewBox','0 0 1100 800');
-const projection=page==='domestic'?d3.geoMercator().center([126.98,37.4]).scale(63000).translate([710,415]):d3.geoMercator().center([136,39]).scale(2300).translate([550,390]);
+const projection=page==='shortwave'?d3.geoMercator().center([123.5,35]).scale(1450).translate([550,390]):page==='domestic'?d3.geoMercator().center([126.98,37.4]).scale(63000).translate([710,415]):d3.geoMercator().center([136,39]).scale(2300).translate([550,390]);
 const path=d3.geoPath(projection);
 const clip=svg.append('defs').append('clipPath').attr('id','map-clip');clip.append('rect').attr('width',1100).attr('height',800);
 const geoLayer=svg.append('g').attr('clip-path','url(#map-clip)');
 geoLayer.selectAll('path').data(MAP_DATA.features).join('path').attr('d',path).attr('class','land');
 if(page==='domestic')geoLayer.selectAll('path.district').data(DISTRICTS.features).join('path').attr('d',path).attr('class',d=>d.properties.name==='성남시분당구'?'district bundang':'district');
 const label=(c,name,dx=0,dy=0,cls='place')=>{const p=projection(c);return svg.append('text').attr('x',p[0]+dx).attr('y',p[1]+dy).attr('class',cls).text(name)};
-(page==='domestic'?[['서울',[127.03,37.62]],['시흥',[126.76,37.36]],['안양',[126.92,37.38]],['수원',[127.01,37.27]],['성남',[127.2,37.46]]]:[['대한민국',[127.5,35.5]],['일본',[137,37]],['홋카이도',[142,44.5]],['동해',[132,40]]]).forEach(([n,c])=>label(c,n));
+(page==='shortwave'?[['중국',[114,31]],['대한민국',[128.5,35]],['일본',[138,33]],['동해',[133,39]]]:page==='domestic'?[['서울',[127.03,37.62]],['시흥',[126.76,37.36]],['안양',[126.92,37.38]],['수원',[127.01,37.27]],['성남',[127.2,37.46]]]:[['대한민국',[127.5,35.5]],['일본',[137,37]],['홋카이도',[142,44.5]],['동해',[132,40]]]).forEach(([n,c])=>label(c,n));
 const tip=document.getElementById('map-tooltip');
 for(const site of dataset.sites){
  const p=projection(site.coord),h=projection(HOME);
@@ -47,8 +47,8 @@ for(const site of dataset.sites){
  for(const value of [site.region,`${site.coord[1].toFixed(5)}, ${site.coord[0].toFixed(5)}`,`${format(site.coord)} km`]){
   const td=document.createElement('td');td.textContent=value;tr.appendChild(td);
  }
- body.appendChild(tr);
+ if(body)body.appendChild(tr);
 }
 const channelCount=dataset.sites.reduce((total,site)=>total+site.channels.length,0);
-document.getElementById('count').textContent=`${channelCount}개 방송 · ${dataset.sites.length}개 송신소`;
+if(document.getElementById('count'))document.getElementById('count').textContent=`${channelCount}개 방송 · ${dataset.sites.length}개 송신소`;
 document.getElementById('sources').innerHTML=dataset.sources.map(([name,url])=>`<li><a href="${url}" target="_blank" rel="noopener noreferrer">${name}</a></li>`).join('');
