@@ -1,8 +1,11 @@
 let scheduleData = null;
 let activeScopeFilter = 'all';
+let activeBandFilter = 'all';
 let activeSiteFilter = 'all';
 let searchQuery = '';
-let selectedChannelId = 'kbs-1radio';
+
+const urlParams = new URLSearchParams(window.location.search);
+let selectedChannelId = urlParams.get('channel') || 'kbs-1radio';
 
 const WEEKDAYS_KO = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -67,12 +70,15 @@ function computeClientOnAir(channel, nowMinutes) {
 
 function updateClockDisplay() {
   const kst = getKstNow();
-  document.getElementById('live-clock').textContent = kst.timeLabel;
-  document.getElementById('live-date').textContent = kst.dateLabel;
+  const clockEl = document.getElementById('live-clock');
+  const dateEl = document.getElementById('live-date');
+  if (clockEl) clockEl.textContent = kst.timeLabel;
+  if (dateEl) dateEl.textContent = kst.dateLabel;
 }
 
 function populateSiteFilter(channels) {
   const select = document.getElementById('site-filter');
+  if (!select) return;
   const sites = new Set();
   for (const ch of channels) {
     for (const t of ch.transmissions || []) {
@@ -93,14 +99,12 @@ function populateSiteFilter(channels) {
 }
 
 function matchesFilter(ch, nowMinutes) {
-  if (activeScopeFilter === 'domestic-fm') {
-    if (ch.scope !== 'domestic' || !ch.bands.includes('FM')) return false;
-  } else if (activeScopeFilter === 'domestic-am') {
-    if (ch.scope !== 'domestic' || !ch.bands.includes('AM')) return false;
-  } else if (activeScopeFilter === 'overseas-am') {
-    if (ch.scope !== 'overseas' || !ch.bands.includes('AM')) return false;
-  } else if (activeScopeFilter === 'overseas-sw') {
-    if (ch.scope !== 'overseas' || !ch.bands.includes('SW')) return false;
+  if (activeScopeFilter !== 'all' && ch.scope !== activeScopeFilter) {
+    return false;
+  }
+
+  if (activeBandFilter !== 'all' && !ch.bands.includes(activeBandFilter)) {
+    return false;
   }
 
   if (activeSiteFilter !== 'all') {
@@ -130,22 +134,30 @@ function matchesFilter(ch, nowMinutes) {
 
 function renderStatusHeader() {
   if (!scheduleData) return;
-  document.getElementById('status-channels').textContent =
-    `${scheduleData.successChannels}/${scheduleData.totalChannels} 채널`;
-  document.getElementById('status-date').textContent = scheduleData.scheduleDate || '-';
-  document.getElementById('status-updated').textContent = formatKstDateTime(scheduleData.updatedAt);
-  document.getElementById('status-next').textContent = formatKstDateTime(scheduleData.nextUpdateAt);
+  const chEl = document.getElementById('status-channels');
+  const dateEl = document.getElementById('status-date');
+  const updEl = document.getElementById('status-updated');
+  const nextEl = document.getElementById('status-next');
+
+  if (chEl) chEl.textContent = `${scheduleData.successChannels}/${scheduleData.totalChannels} 채널`;
+  if (dateEl) dateEl.textContent = scheduleData.scheduleDate || '-';
+  if (updEl) updEl.textContent = formatKstDateTime(scheduleData.updatedAt);
+  if (nextEl) nextEl.textContent = formatKstDateTime(scheduleData.nextUpdateAt);
 }
 
 function renderOnAirDashboard() {
   if (!scheduleData) return;
   const grid = document.getElementById('onair-grid');
+  if (!grid) return;
+
   const { nowMinutes } = getKstNow();
   const filtered = (scheduleData.channels || []).filter((ch) => matchesFilter(ch, nowMinutes));
 
   const totalFreqs = filtered.reduce((acc, ch) => acc + (ch.transmissions?.length || 0), 0);
-  document.getElementById('onair-count').textContent =
-    `${filtered.length}개 채널 · ${totalFreqs}개 주파수 표시 중`;
+  const countEl = document.getElementById('onair-count');
+  if (countEl) {
+    countEl.textContent = `${filtered.length}개 채널 · ${totalFreqs}개 주파수 표시 중`;
+  }
 
   grid.replaceChildren();
 
@@ -160,11 +172,11 @@ function renderOnAirDashboard() {
   for (const ch of filtered) {
     const { currentProgram, nextProgram } = computeClientOnAir(ch, nowMinutes);
     const card = document.createElement('article');
-    card.className = `onair-card${ch.id === selectedChannelId ? ' selected' : ''}`;
+    card.className = 'onair-card';
     card.dataset.band = ch.primaryBand;
     card.tabIndex = 0;
-    card.setAttribute('role', 'button');
-    card.setAttribute('aria-label', `${ch.name} 일일 전체 편성표 보기`);
+    card.setAttribute('role', 'link');
+    card.setAttribute('aria-label', `${ch.name} 일일 전체 편성표 페이지로 이동`);
 
     const freqHtml = (ch.transmissions || [])
       .map(
@@ -211,18 +223,15 @@ function renderOnAirDashboard() {
       </div>
     `;
 
-    const selectStation = () => {
-      selectedChannelId = ch.id;
-      renderOnAirDashboard();
-      renderTimetableSection(true);
-      document.getElementById('timetable-section').scrollIntoView({ behavior: 'smooth' });
+    const goToTimetable = () => {
+      window.location.href = `timetable.html?channel=${encodeURIComponent(ch.id)}`;
     };
 
-    card.addEventListener('click', selectStation);
+    card.addEventListener('click', goToTimetable);
     card.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        selectStation();
+        goToTimetable();
       }
     });
 
@@ -232,35 +241,55 @@ function renderOnAirDashboard() {
 
 function renderTimetableSection(scrollToOnAir = false) {
   if (!scheduleData || !scheduleData.channels?.length) return;
-  const channels = scheduleData.channels;
-  const selected = channels.find((c) => c.id === selectedChannelId) || channels[0];
-  selectedChannelId = selected.id;
+  const selectorEl = document.getElementById('station-selector');
+  if (!selectorEl) return;
 
   const { nowMinutes, hmLabel } = getKstNow();
+  const allChannels = scheduleData.channels;
+  const filteredChannels = allChannels.filter((ch) => matchesFilter(ch, nowMinutes));
+
+  const sidebarCountEl = document.getElementById('sidebar-count');
+  if (sidebarCountEl) {
+    sidebarCountEl.textContent = `${filteredChannels.length}개`;
+  }
+
+  let selected =
+    filteredChannels.find((c) => c.id === selectedChannelId) ||
+    filteredChannels[0] ||
+    allChannels.find((c) => c.id === selectedChannelId) ||
+    allChannels[0];
+  selectedChannelId = selected.id;
 
   // 1. 왼쪽 방송국 선택 사이드바
-  const selectorEl = document.getElementById('station-selector');
   selectorEl.replaceChildren();
 
-  for (const ch of channels) {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = `station-select-btn${ch.id === selected.id ? ' active' : ''}`;
-    const freqs = (ch.transmissions || []).map((t) => t.frequency).join(' / ');
-    const { currentProgram } = computeClientOnAir(ch, nowMinutes);
-    btn.innerHTML = `
-      <div class="select-top">
-        <span>${ch.name}</span>
-        <span class="band-pill ${ch.primaryBand}">${ch.primaryBand}</span>
-      </div>
-      <div class="select-sub">${freqs} · ${currentProgram ? currentProgram.title : ch.category}</div>
-    `;
-    btn.addEventListener('click', () => {
-      selectedChannelId = ch.id;
-      renderOnAirDashboard();
-      renderTimetableSection(true);
-    });
-    selectorEl.appendChild(btn);
+  if (filteredChannels.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'sidebar-empty';
+    empty.textContent = '선택한 필터 조건에 맞는 방송국이 없습니다.';
+    selectorEl.appendChild(empty);
+  } else {
+    for (const ch of filteredChannels) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `station-select-btn${ch.id === selected.id ? ' active' : ''}`;
+      const freqs = (ch.transmissions || []).map((t) => t.frequency).join(' / ');
+      const { currentProgram } = computeClientOnAir(ch, nowMinutes);
+      btn.innerHTML = `
+        <div class="select-top">
+          <span>${ch.name}</span>
+          <span class="band-pill ${ch.primaryBand}">${ch.primaryBand}</span>
+        </div>
+        <div class="select-sub">${freqs} · ${currentProgram ? currentProgram.title : ch.category}</div>
+      `;
+      btn.addEventListener('click', () => {
+        selectedChannelId = ch.id;
+        const nextUrl = `${window.location.pathname}?channel=${encodeURIComponent(ch.id)}`;
+        window.history.replaceState(null, '', nextUrl);
+        renderTimetableSection(true);
+      });
+      selectorEl.appendChild(btn);
+    }
   }
 
   // 2. 선택된 방송국 상단 메타 카드
@@ -366,48 +395,91 @@ async function loadSchedules(scrollToOnAir = false) {
   renderTimetableSection(scrollToOnAir);
 }
 
-// 이벤트 바인딩
-document.getElementById('scope-filters').addEventListener('click', (e) => {
-  const btn = e.target.closest('.filter-chip');
-  if (!btn) return;
-  document.querySelectorAll('#scope-filters .filter-chip').forEach((b) => b.classList.remove('active'));
-  btn.classList.add('active');
-  activeScopeFilter = btn.dataset.filter;
-  renderOnAirDashboard();
-});
+// 이벤트 바인딩 (현재 페이지에 존재하는 요소에만 연결)
+function syncFilterButtonsUI() {
+  const isAll = activeScopeFilter === 'all' && activeBandFilter === 'all';
+  document.querySelectorAll('#scope-filters .filter-chip').forEach((btn) => {
+    const type = btn.dataset.filterType;
+    const val = btn.dataset.filter;
+    let isActive = false;
+    if (type === 'all') {
+      isActive = isAll;
+    } else if (type === 'scope') {
+      isActive = activeScopeFilter === val;
+    } else if (type === 'band') {
+      isActive = activeBandFilter === val;
+    }
+    btn.classList.toggle('active', isActive);
+    btn.setAttribute('aria-pressed', String(isActive));
+  });
+}
 
-document.getElementById('site-filter').addEventListener('change', (e) => {
-  activeSiteFilter = e.target.value;
-  renderOnAirDashboard();
-});
+const scopeFiltersEl = document.getElementById('scope-filters');
+if (scopeFiltersEl) {
+  scopeFiltersEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('.filter-chip');
+    if (!btn) return;
+    const type = btn.dataset.filterType;
+    const val = btn.dataset.filter;
 
-document.getElementById('search-input').addEventListener('input', (e) => {
-  searchQuery = e.target.value.trim();
-  renderOnAirDashboard();
-});
+    if (type === 'all') {
+      activeScopeFilter = 'all';
+      activeBandFilter = 'all';
+    } else if (type === 'scope') {
+      activeScopeFilter = activeScopeFilter === val ? 'all' : val;
+    } else if (type === 'band') {
+      activeBandFilter = activeBandFilter === val ? 'all' : val;
+    }
 
-document.getElementById('scroll-onair-btn').addEventListener('click', () => {
-  renderTimetableSection(true);
-});
-
-document.getElementById('refresh-btn').addEventListener('click', async () => {
-  const btn = document.getElementById('refresh-btn');
-  btn.disabled = true;
-  btn.textContent = '웹에서 수집 중...';
-  try {
-    const res = await fetch('/api/refresh', { method: 'POST' });
-    if (!res.ok) throw new Error('업데이트 요청 실패');
-    scheduleData = await res.json();
-    renderStatusHeader();
+    syncFilterButtonsUI();
     renderOnAirDashboard();
+    renderTimetableSection(false);
+  });
+}
+
+const siteFilterEl = document.getElementById('site-filter');
+if (siteFilterEl) {
+  siteFilterEl.addEventListener('change', (e) => {
+    activeSiteFilter = e.target.value;
+    renderOnAirDashboard();
+  });
+}
+
+const searchInputEl = document.getElementById('search-input');
+if (searchInputEl) {
+  searchInputEl.addEventListener('input', (e) => {
+    searchQuery = e.target.value.trim();
+    renderOnAirDashboard();
+  });
+}
+
+const scrollOnAirBtn = document.getElementById('scroll-onair-btn');
+if (scrollOnAirBtn) {
+  scrollOnAirBtn.addEventListener('click', () => {
     renderTimetableSection(true);
-  } catch (err) {
-    alert(`편성표 업데이트 중 오류가 발생했습니다: ${err.message}`);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '지금 편성표 업데이트';
-  }
-});
+  });
+}
+
+const refreshBtn = document.getElementById('refresh-btn');
+if (refreshBtn) {
+  refreshBtn.addEventListener('click', async () => {
+    refreshBtn.disabled = true;
+    refreshBtn.textContent = '웹에서 수집 중...';
+    try {
+      const res = await fetch('/api/refresh', { method: 'POST' });
+      if (!res.ok) throw new Error('업데이트 요청 실패');
+      scheduleData = await res.json();
+      renderStatusHeader();
+      renderOnAirDashboard();
+      renderTimetableSection(true);
+    } catch (err) {
+      alert(`편성표 업데이트 중 오류가 발생했습니다: ${err.message}`);
+    } finally {
+      refreshBtn.disabled = false;
+      refreshBtn.textContent = '지금 편성표 업데이트';
+    }
+  });
+}
 
 // 초기 실행 및 실시간 타이머
 updateClockDisplay();

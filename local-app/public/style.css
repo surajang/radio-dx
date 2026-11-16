@@ -284,28 +284,44 @@ h2 {
   margin-bottom: 16px;
 }
 
-.filter-tabs {
+.filter-groups {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  align-items: center;
+  gap: 10px;
+}
+
+.filter-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 9px;
 }
 
 .filter-chip {
   font: inherit;
   font-size: 13px;
-  font-weight: 600;
-  padding: 7px 12px;
-  border-radius: 7px;
-  border: 1px solid var(--line);
-  background: var(--bg);
+  font-weight: 650;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 0;
+  background: transparent;
   color: var(--muted);
   cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.filter-chip:hover {
+  color: var(--fg);
+  background: var(--panel-alt);
 }
 
 .filter-chip.active {
   background: var(--fg);
   color: var(--bg);
-  border-color: var(--fg);
 }
 
 .filter-inputs {
@@ -536,8 +552,14 @@ h2 {
 
 /* 일일 편성표 섹션 레이아웃 */
 #timetable-section {
-  margin-top: 44px;
+  margin-top: 16px;
   scroll-margin-top: 16px;
+}
+
+.timetable-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .timetable-layout {
@@ -555,12 +577,38 @@ h2 {
 }
 
 .sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 12px 15px;
   font-size: 13px;
   font-weight: 700;
   color: var(--muted);
   border-bottom: 1px solid var(--line);
   background: var(--panel-alt);
+}
+
+.sidebar-filters {
+  padding: 10px 10px 8px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.sidebar-filters .filter-groups {
+  gap: 6px;
+}
+
+.sidebar-filters .filter-chip {
+  font-size: 12px;
+  padding: 5px 9px;
+}
+
+.sidebar-empty {
+  margin: 0;
+  padding: 20px 12px;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
 }
 
 .station-selector-list {

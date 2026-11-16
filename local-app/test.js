@@ -11,11 +11,18 @@ async function runTests() {
   console.log(`[Test] 테스트 서버 실행 완료: ${baseUrl}`);
 
   try {
-    // 1. 메인 페이지 확인
+    // 1. 메인 페이지(실시간 ON AIR) 및 일일 전체 편성표 분리 페이지 확인
     const indexRes = await fetch(`${baseUrl}/`);
     assert.strictEqual(indexRes.status, 200, '메인 페이지 응답은 200이어야 합니다.');
     const indexHtml = await indexRes.text();
     assert(indexHtml.includes('지금 방송 중 (ON AIR) 요약 대시보드'), '대시보드 제목이 포함되어야 합니다.');
+    assert(!indexHtml.includes('id="timetable-section"'), '실시간 ON AIR 페이지에는 일일 편성표 섹션이 없어야 합니다.');
+
+    const timetableRes = await fetch(`${baseUrl}/timetable.html`);
+    assert.strictEqual(timetableRes.status, 200, '일일 전체 편성표 페이지 응답은 200이어야 합니다.');
+    const timetableHtml = await timetableRes.text();
+    assert(timetableHtml.includes('방송국 · 주파수별 일일 전체 편성표'), '일일 전체 편성표 제목이 포함되어야 합니다.');
+    assert(!timetableHtml.includes('id="onair-grid"'), '일일 전체 편성표 페이지에는 ON AIR 그리드가 없어야 합니다.');
 
     // 2. /api/schedules 확인
     const apiRes = await fetch(`${baseUrl}/api/schedules`);
