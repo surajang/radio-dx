@@ -1,7 +1,7 @@
 const { updateAllSchedules, enrichWithOnAirStatus } = require('./src/fetcher');
 
 async function main() {
-  console.log('[Radio DX Updater] 국내·해외 24개 채널(27개 주파수) 편성표 수집을 시작합니다...');
+  console.log('[Radio DX Updater] 국내·해외 25개 채널(28개 주파수) 편성표 수집을 시작합니다...');
   const start = Date.now();
   const payload = await updateAllSchedules();
   const enriched = enrichWithOnAirStatus(payload);

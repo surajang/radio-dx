@@ -25,7 +25,7 @@
     <div class="hero-bar">
       <div>
         <h1>라디오 편성표 · 실시간 ON AIR</h1>
-        <p class="intro">수도권 주요 AM·FM 방송(20개 채널·22개 주파수)과 일본 NHK 제1·라디오 닛케이(4개 채널·5개 주파수)의 편성표를 24시간 주기로 자동 수집합니다.</p>
+        <p class="intro">수도권 주요 AM·FM 방송(20개 채널·22개 주파수)과 일본 NHK 제1·라디오 닛케이(5개 채널·6개 주파수)의 편성표를 24시간 주기로 자동 수집합니다.</p>
       </div>
       <div class="clock-card" aria-live="polite">
         <div class="clock-label">한국표준시 (KST · UTC+9)</div>
@@ -36,7 +36,7 @@
 
     <section class="status-strip" aria-label="수집 및 서버 상태">
       <div class="status-items">
-        <span class="status-pill"><span class="dot ok"></span><strong id="status-channels">24/24 채널</strong> 수집 정상</span>
+        <span class="status-pill"><span class="dot ok"></span><strong id="status-channels">25/25 채널</strong> 수집 정상</span>
         <span>기준일: <strong id="status-date">-</strong></span>
         <span>최근 업데이트: <strong id="status-updated">-</strong></span>
         <span>다음 자동 갱신(24h): <strong id="status-next">-</strong></span>
@@ -46,7 +46,7 @@
 
     <div class="legend">
       <span><i class="key"></i>FM 초단파 (관악산·남산)</span>
-      <span><i class="key am"></i>AM 중파 (소래·남양·오사카·후쿠오카)</span>
+      <span><i class="key am"></i>AM 중파 (소래·남양·도쿄·오사카·후쿠오카)</span>
       <span><i class="key sw"></i>SW 단파 (나가라·네무로)</span>
     </div>
 
@@ -59,15 +59,15 @@
 
       <div class="filter-bar" role="region" aria-label="방송 필터 및 검색">
         <div class="filter-tabs" id="scope-filters" role="group" aria-label="대역 및 지역 필터">
-          <button type="button" class="filter-chip active" data-filter="all">전체 (24)</button>
+          <button type="button" class="filter-chip active" data-filter="all">전체 (25)</button>
           <button type="button" class="filter-chip" data-filter="domestic-fm">국내 FM (20)</button>
           <button type="button" class="filter-chip" data-filter="domestic-am">국내 AM (2)</button>
-          <button type="button" class="filter-chip" data-filter="overseas-am">일본 NHK 중파 (2)</button>
+          <button type="button" class="filter-chip" data-filter="overseas-am">일본 NHK 중파 (3)</button>
           <button type="button" class="filter-chip" data-filter="overseas-sw">라디오 닛케이 단파 (2)</button>
         </div>
         <div class="filter-inputs">
           <select id="site-filter" aria-label="송신소 선택">
-            <option value="all">모든 송신소 (8곳)</option>
+            <option value="all">모든 송신소 (9곳)</option>
           </select>
           <input id="search-input" type="search" placeholder="주파수(예: 97.3, 666), 방송국, 프로그램 검색..." aria-label="주파수, 방송국, 프로그램 검색">
         </div>

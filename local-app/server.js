@@ -8,6 +8,7 @@ const {
   updateAllSchedules,
   enrichWithOnAirStatus
 } = require('./src/fetcher');
+const { CHANNEL_DEFS } = require('./src/stations-meta');
 
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || '0.0.0.0';
@@ -62,9 +63,10 @@ async function initScheduleState() {
   if (existing && existing.channels && existing.channels.length > 0) {
     currentPayload = existing;
     const ageMs = Date.now() - new Date(existing.updatedAt).getTime();
-    if (existing.scheduleDate !== todayKst || ageMs >= UPDATE_INTERVAL_MS) {
+    const catalogChanged = existing.channels.length !== CHANNEL_DEFS.length;
+    if (existing.scheduleDate !== todayKst || ageMs >= UPDATE_INTERVAL_MS || catalogChanged) {
       try {
-        await triggerUpdate('startup-stale');
+        await triggerUpdate(catalogChanged ? 'startup-catalog-changed' : 'startup-stale');
       } catch (err) {
         console.error('[Server] 부팅 초기 업데이트 실패 (기존 캐시 유지):', err.message);
       }

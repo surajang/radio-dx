@@ -236,6 +236,26 @@ const RADIO_DATA={
         "width": 320
       },
       {
+        "name": "NHK 도쿄 · 쇼부쿠키",
+        "coord": [
+          139.62396,
+          36.07234
+        ],
+        "band": "AM",
+        "region": "일본 사이타마현 구키시",
+        "label": [
+          755,
+          480
+        ],
+        "channels": [
+          [
+            "NHK 제1 JOAK",
+            "594 kHz"
+          ]
+        ],
+        "width": 305
+      },
+      {
         "name": "NHK 오사카 · 미하라",
         "coord": [
           135.56675,
@@ -292,6 +312,10 @@ const RADIO_DATA={
       [
         "나가라 위치: 일본 단파 송신소 자료",
         "https://www.swcountry.be/j.html"
+      ],
+      [
+        "NHK 쇼부쿠키 현장 자료",
+        "https://491mhz.net/soushinjo/saitama/NHK_shoubu_kuki_AM.html"
       ],
       [
         "NHK 미하라 현장 자료",

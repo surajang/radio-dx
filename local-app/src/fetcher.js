@@ -489,7 +489,7 @@ async function fetchAfnEagle(dayOfWeek) {
   return normalizeScheduleItems(raw);
 }
 
-// 14. 일본 NHK 제1 (JOBK 오사카 / JOLK 후쿠오카) 및 라디오 닛케이 (RN1 / RN2) - Radiko 공식 XML API
+// 14. 일본 NHK 제1 (JOAK 도쿄 / JOBK 오사카 / JOLK 후쿠오카) 및 라디오 닛케이 (RN1 / RN2) - Radiko 공식 XML API
 async function fetchRadiko(stationId, ymd) {
   const url = `https://radiko.jp/v3/program/station/date/${ymd}/${stationId}.xml`;
   const res = await fetchWithTimeout(url);
@@ -527,7 +527,7 @@ async function loadExistingData() {
 }
 
 /**
- * 전체 24개 채널의 일일 편성표를 웹에서 가져와 로컬 파일(data/schedules.json)에 저장합니다.
+ * 전체 25개 채널의 일일 편성표를 웹에서 가져와 로컬 파일(data/schedules.json)에 저장합니다.
  */
 async function updateAllSchedules() {
   const startedAt = new Date();

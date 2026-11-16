@@ -6,7 +6,7 @@
 
 ### 1. `page/` (GitHub Pages 정적 페이지)
 - `page/index.html`: 국내 라디오. 수도권 주요 22개 방송, 관악산·남산·소래·남양 4개 송신소.
-- `page/overseas.html`: 해외 라디오. 일본 닛케이·NHK 5개 방송, 4개 송신소.
+- `page/overseas.html`: 해외 라디오. 일본 닛케이·NHK 6개 방송, 5개 송신소.
 - `page/shortwave.html`: 주요 단파방송. 김제·야마타·베이징·시안·나가라·진화 6개 송신소의 지도, 거리, 출력, 한국시간 방송 시간표와 출처.
 - `page/tuner.html`: 기존 국내·해외 목록의 주파수 탐색. 주요 단파방송의 시간표는 별도 페이지에서 확인합니다.
 
@@ -15,7 +15,7 @@
 기존 방송 목록은 `page/stations.js`, 주요 단파방송 자료는 `page/shortwave-data.js`와 `page/shortwave.html`, 지도와 목록 표시는 `page/app.js`, 화면 스타일은 `page/style.css`에서 관리합니다.
 
 ### 2. `local-app/` (홈 네트워크 로컬 편성표 서버)
-- 국내 AM/FM 20개 방송국 및 일본 NHK 제1·라디오 닛케이 4개 방송국의 일일 편성표를 24시간 주기로 자동 수집하여 로컬 네트워크(`http://localhost:3000`)에 서빙합니다.
+- 국내 AM/FM 20개 방송국 및 일본 NHK 제1·라디오 닛케이 5개 방송국의 일일 편성표를 24시간 주기로 자동 수집하여 로컬 네트워크(`http://localhost:3000`)에 서빙합니다.
 - 자세한 실행 및 서비스 설정 방법은 [`local-app/README.md`](local-app/README.md)를 참고하세요.
 
 ## GitHub Pages 배포

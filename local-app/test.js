@@ -21,23 +21,23 @@ async function runTests() {
     const apiRes = await fetch(`${baseUrl}/api/schedules`);
     assert.strictEqual(apiRes.status, 200, '/api/schedules 응답은 200이어야 합니다.');
     const data = await apiRes.json();
-    assert.strictEqual(data.totalChannels, 24, '총 24개 고유 채널이어야 합니다.');
-    assert.strictEqual(data.successChannels, 24, '24개 채널 모두 수집 성공 상태여야 합니다.');
+    assert.strictEqual(data.totalChannels, 25, '총 25개 고유 채널이어야 합니다.');
+    assert.strictEqual(data.successChannels, 25, '25개 채널 모두 수집 성공 상태여야 합니다.');
 
     const totalTransmissions = data.channels.reduce((sum, c) => sum + c.transmissions.length, 0);
-    assert.strictEqual(totalTransmissions, 27, 'stations.js의 27개 송출 주파수(국내 22 + 해외 5)가 모두 매핑되어야 합니다.');
+    assert.strictEqual(totalTransmissions, 28, 'stations.js의 28개 송출 주파수(국내 22 + 해외 6)가 모두 매핑되어야 합니다.');
 
     // 3. /api/onair 확인
     const onairRes = await fetch(`${baseUrl}/api/onair`);
     assert.strictEqual(onairRes.status, 200, '/api/onair 응답은 200이어야 합니다.');
     const onairData = await onairRes.json();
-    assert.strictEqual(onairData.channels.length, 24, 'ON AIR 목록은 24개 채널을 반환해야 합니다.');
+    assert.strictEqual(onairData.channels.length, 25, 'ON AIR 목록은 25개 채널을 반환해야 합니다.');
 
     // 4. 기존 정적 지도 페이지 연동 확인
     const mapRes = await fetch(`${baseUrl}/dx-map/index.html`);
     assert.strictEqual(mapRes.status, 200, '/dx-map/index.html 연동 응답은 200이어야 합니다.');
 
-    console.log('[Test] 모든 테스트 통과! (24개 채널 · 27개 주파수 · 웹서버 API 정상 작동)');
+    console.log('[Test] 모든 테스트 통과! (25개 채널 · 28개 주파수 · 웹서버 API 정상 작동)');
   } finally {
     server.close();
   }

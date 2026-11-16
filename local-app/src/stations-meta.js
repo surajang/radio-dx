@@ -29,7 +29,7 @@ function loadRootStationsJs() {
 
 /**
  * stations.js의 방송국 이름과 주파수를 고유 채널 ID로 매핑합니다.
- * 국내 20개 고유 채널(22개 주파수) + 해외 4개 고유 채널(5개 주파수) = 총 24개 고유 채널 (27개 송신 주파수)
+ * 국내 20개 고유 채널(22개 주파수) + 해외 5개 고유 채널(6개 주파수) = 총 25개 고유 채널 (28개 송신 주파수)
  */
 const CHANNEL_DEFS = [
   // === 국내 방송 (20개 고유 채널, 22개 주파수) ===
@@ -274,7 +274,7 @@ const CHANNEL_DEFS = [
     fetcherParam: 'eagle'
   },
 
-  // === 해외 방송 (4개 고유 채널, 5개 주파수) ===
+  // === 해외 방송 (5개 고유 채널, 6개 주파수) ===
   {
     id: 'nikkei-1',
     name: '라디오 닛케이 제1',
@@ -298,6 +298,18 @@ const CHANNEL_DEFS = [
     sourceUrl: 'https://www.radionikkei.jp/timetable/',
     fetcherType: 'radiko',
     fetcherParam: 'RN2'
+  },
+  {
+    id: 'nhk-tokyo-r1',
+    name: 'NHK 제1 JOAK (도쿄)',
+    broadcaster: 'NHK',
+    scope: 'overseas',
+    category: '일본 NHK 라디오 제1방송 · 간토 광역 (중파)',
+    matchNames: ['NHK 제1 JOAK'],
+    sourceName: 'NHK 라디오 / Radiko 공식 XML 편성표 (JOAK)',
+    sourceUrl: 'https://www.nhk.or.jp/radio/',
+    fetcherType: 'radiko',
+    fetcherParam: 'JOAK'
   },
   {
     id: 'nhk-osaka-r1',
